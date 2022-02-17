@@ -26,7 +26,13 @@
         }
       },
       "click_time" : {
-        "type" : "date"
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
       },
       "query" : {
         "type" : "text",
@@ -38,7 +44,13 @@
         }
       },
       "query_time" : {
-        "type" : "date"
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
       },
       "sku" : {
         "type" : "long"
