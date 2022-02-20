@@ -106,16 +106,12 @@ def query():
 
 def create_query(user_query, filters, sort="_score", sortDir="desc"):
     print("Query: {} Filters: {} Sort: {}".format(user_query, filters, sort))
-    query_obj = {
-        "size": 10,
-        "sort": [
-            {
-                sort: {
-                    "order": sortDir
-                }
-            }
-        ],
-        "query": {
+    if user_query == "*":
+        query = {
+            "match_all": {}
+        }
+    else:
+        query = {
             "function_score": {
                 "query": {
                     "bool": {
@@ -156,8 +152,17 @@ def create_query(user_query, filters, sort="_score", sortDir="desc"):
                     }
                 ],
             }
-        },
-
+        }
+    query_obj = {
+        "size": 10,
+        "sort": [
+            {
+                sort: {
+                    "order": sortDir
+                }
+            }
+        ],
+        "query": query,
         "aggs": {
             "departments": {
                 "terms": {
