@@ -39,11 +39,11 @@ def process_filters(filters_input):
                         }
                     }
                 })
-            display_filters.append(f"Results with {filter} in range from {filter_from} to={filter_to}")
+            display_filters.append(f"Results with {filter} in range from {filter_from} to {filter_to}")
             applied_filters += f"&{filter}.from={filter_from}&{filter}.to={filter_to}"
         elif type == "terms":
-            filters.append({"term": {filter: key}})
-            display_filters.append(f"Results with {filter} as {key}")
+            filters.append({"term": {f"{filter}.keyword": key}})
+            display_filters.append(f"Results with {filter} in {key}")
             applied_filters += f"&filter.name={filter}&{filter}.type={type}&{filter}.key={key}"
     print("Filters: {}".format(filters))
 
