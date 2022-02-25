@@ -9,15 +9,13 @@ def binary_func(x):
 
 def step(x):
     # print("IMPLEMENT ME: step(x) a step function with a simple heuristic that buckets grades")
-    if x>.5:
-        return 1
-    elif x>.25:
-        return .75
-    elif x>.1:
+    if x<.05:
+        return 0
+    elif x<.1:
         return .5
-    elif x>.05:
-        return .25
-    return 0
+    elif x<.3:
+        return .75
+    return 1
 
 
 rng = np.random.default_rng(123456)
