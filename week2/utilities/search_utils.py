@@ -13,7 +13,7 @@ import os
 
 
 def evaluate_test_set(test_data, prior_clicks_df, opensearch, xgb_model_name, ltr_store, index, num_queries=100,
-                      size=500, rescore_size=500, precision=10, main_query_weight=1, rescore_query_weight=2):
+                      size=1000, rescore_size=500, precision=10, main_query_weight=1, rescore_query_weight=2):
     # (ranks_df, features_df) = data_prepper.get_judgments(test_data, True) # judgments as a Pandas DataFrame
     if precision > size:
         print("Precision can't be greater than the fetch size, changing the precision to be same as size")
