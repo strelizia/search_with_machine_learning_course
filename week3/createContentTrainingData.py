@@ -1,11 +1,18 @@
 import argparse
 import os
 import random
+import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+from nltk.stem import SnowballStemmer
+
+stemmer = SnowballStemmer("english")
+
 def transform_name(product_name):
-    # IMPLEMENT
+    product_name = re.sub('[^\w\s]', ' ', product_name.lower())
+    if len(product_name)>0:
+        product_name = ' '.join([stemmer.stem(x) for x in product_name.split()])
     return product_name
 
 # Directory for product data
