@@ -33,7 +33,7 @@ if args.input:
     directory = args.input
 
 def rating_category(r):
-    print(f'rating: {r}')
+    # print(f'rating: {r}')
     if float(r) < 3.0:
         return 'negative'
     elif float(r) > 3.0:
