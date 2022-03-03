@@ -27,6 +27,7 @@ general.add_argument("--output", default="/workspace/datasets/fasttext/output.fa
 general.add_argument("--sample_rate", default=1.0, type=float, help="The rate at which to sample input (default is 1.0)")
 
 general.add_argument("--min_products", default=0, type=int, help="The minimum number of products per category (default is 0).")
+general.add_argument("--prune_level", default=0, type=int, help="Number of levels to prune for creating labels")
 
 args = parser.parse_args()
 output_file = args.output
@@ -51,11 +52,12 @@ for filename in os.listdir(directory):
             if random.random() > sample_rate:
                 continue
             # Check to make sure category name is valid
+            cat_index = max(len(child.find('categoryPath')) - (1+args.prune_level),0)
             if (child.find('name') is not None and child.find('name').text is not None and
                 child.find('categoryPath') is not None and len(child.find('categoryPath')) > 0 and
-                child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text is not None):
-                # Choose last element in categoryPath as the leaf categoryId
-                cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
+                child.find('categoryPath')[cat_index][0].text is not None):
+                # Choose element at index cat_index in categoryPath as the leaf categoryId
+                cat = child.find('categoryPath')[cat_index][0].text
                 # Replace newline chars with spaces so fastText doesn't complain
                 name = child.find('name').text.replace('\n', ' ')
                 entry = "__label__%s %s\n" % (cat, transform_name(name))
