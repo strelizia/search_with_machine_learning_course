@@ -1,0 +1,15 @@
+# week 4
+cd /workspace/search_with_machine_learning_course
+python week4/create_labeled_queries.py --output /workspace/datasets/labeled_query_data.txt --min_queries 100
+
+shuf /workspace/datasets/labeled_query_data.txt > /workspace/datasets/shuf_labeled_query_data.txt
+
+head -50000 /workspace/datasets/shuf_labeled_query_data.txt > /workspace/datasets/query.train
+tail -50000 /workspace/datasets/shuf_labeled_query_data.txt > /workspace/datasets/query.test
+
+cd /workspace/datasets
+~/fastText-0.9.2/fasttext supervised -input query.train -output fasttext/query_model -epoch 25
+
+~/fastText-0.9.2/fasttext test query_model.bin query.test
+~/fastText-0.9.2/fasttext test query_model.bin query.test 3
+~/fastText-0.9.2/fasttext test query_model.bin query.test 5
