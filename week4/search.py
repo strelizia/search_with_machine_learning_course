@@ -10,6 +10,16 @@ from week4.opensearch import get_opensearch
 import week4.utilities.query_utils as qu
 import week4.utilities.ltr_utils as lu
 
+import re
+import nltk
+stemmer = nltk.stem.PorterStemmer()
+
+def clean_query(text):
+    text = re.sub('[^\w\s]', ' ', text.lower())
+    if len(text)>0:
+        text = ' '.join([stemmer.stem(x) for x in text.split()])
+    return text
+
 bp = Blueprint('search', __name__, url_prefix='/search')
 
 
@@ -61,7 +71,7 @@ def get_query_category(user_query, query_class_model):
     score_sum = 0
     score_cutoff = 0.5
     score_sum_cutoff = 1.5
-    pred = query_class_model.predict(user_query, k=num_pred)
+    pred = query_class_model.predict(clean_query(user_query), k=num_pred)
     results = []
     for i in range(num_pred):
         cat = pred[0][i]
