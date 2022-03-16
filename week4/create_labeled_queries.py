@@ -1,4 +1,5 @@
 import os
+import re
 import argparse
 import xml.etree.ElementTree as ET
 import pandas as pd
@@ -8,6 +9,12 @@ import csv
 # Useful if you want to perform stemming.
 import nltk
 stemmer = nltk.stem.PorterStemmer()
+
+def clean_query(text):
+    text = re.sub('[^\w\s]', ' ', text.lower())
+    if len(text)>0:
+        text = ' '.join([stemmer.stem(x) for x in text.split()])
+    return text
 
 categories_file_name = r'/workspace/datasets/product_data/categories/categories_0001_abcat0010000_to_pcmcat99300050000.xml'
 
@@ -48,9 +55,18 @@ parents_df = pd.DataFrame(list(zip(categories, parents)), columns =['category', 
 df = pd.read_csv(queries_file_name)[['category', 'query']]
 df = df[df['category'].isin(categories)]
 
-# IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+df['query'] = df['query'].apply(clean_query)
 
-# IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
+while True:
+    cat_count = df['category'].value_counts()
+    cat_count_less = cat_count[cat_count<min_queries].index.values
+    if len(cat_count_less)==0:
+        break
+    parents_df_subset = parents_df.loc[parents_df['category'].isin(cat_count_less)]
+    df.loc[df['category'].isin(cat_count_less), 'category'] = df.loc[df['category'].isin(cat_count_less), 'category']\
+    .replace(parents_df_subset['category'].to_list(), parents_df_subset['parent'].to_list())
+
+print(f'Number of unique categories: {len(cat_count)}')
 
 # Create labels in fastText format.
 df['label'] = '__label__' + df['category']

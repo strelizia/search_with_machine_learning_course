@@ -10,6 +10,16 @@ from week4.opensearch import get_opensearch
 import week4.utilities.query_utils as qu
 import week4.utilities.ltr_utils as lu
 
+import re
+import nltk
+stemmer = nltk.stem.PorterStemmer()
+
+def clean_query(text):
+    text = re.sub('[^\w\s]', ' ', text.lower())
+    if len(text)>0:
+        text = ' '.join([stemmer.stem(x) for x in text.split()])
+    return text
+
 bp = Blueprint('search', __name__, url_prefix='/search')
 
 
@@ -57,8 +67,20 @@ def process_filters(filters_input):
     return filters, display_filters, applied_filters
 
 def get_query_category(user_query, query_class_model):
-    print("IMPLEMENT ME: get_query_category")
-    return None
+    num_pred = 5
+    score_sum = 0
+    score_cutoff = 0.5
+    score_sum_cutoff = 1.5
+    pred = query_class_model.predict(clean_query(user_query), k=num_pred)
+    results = []
+    for i in range(num_pred):
+        cat = pred[0][i]
+        score = pred[1][i]
+        if score<score_cutoff or score_sum>score_sum_cutoff:
+            break
+        results.append(cat.replace("__label__", ""))
+        score_sum += score
+    return results
 
 
 @bp.route('/query', methods=['GET', 'POST'])
@@ -121,7 +143,7 @@ def query():
             explain = True
         if filters_input:
             (filters, display_filters, applied_filters) = process_filters(filters_input)
-        model = request.args.get("model", "simiple")
+        model = request.args.get("model", "simple")
         if model == "simple_LTR":
             query_obj = qu.create_simple_baseline(user_query, click_prior, filters, sort, sortDir, size=500)
             query_obj = lu.create_rescore_ltr_query(user_query, query_obj, click_prior, ltr_model_name, ltr_store_name, rescore_size=500)
@@ -137,8 +159,14 @@ def query():
 
     query_class_model = current_app.config["query_model"]
     query_category = get_query_category(user_query, query_class_model)
-    if query_category is not None:
-        print("IMPLEMENT ME: add this into the filters object so that it gets applied at search time.  This should look like your `term` filter from week 1 for department but for categories instead")
+
+    if query_category and len(query_category) > 0:
+        query_obj['query']['bool']['filter'] = [{
+            "terms": {
+                "categoryPathIds.keyword": query_category
+            }
+        }]
+
     #print("query obj: {}".format(query_obj))
     response = opensearch.search(body=query_obj, index=current_app.config["index_name"], explain=explain)
     # Postprocess results here if you so desire
